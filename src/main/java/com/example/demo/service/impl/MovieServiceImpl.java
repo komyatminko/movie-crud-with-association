@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,10 +22,15 @@ import com.example.demo.model.entity.MovieComment;
 import com.example.demo.model.entity.MovieDetails;
 import com.example.demo.service.MovieService;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
 public class MovieServiceImpl implements MovieService {
+	
+	@PersistenceContext
+	EntityManager entityManager;
 
 	@Autowired
 	MovieDao movieDao;
@@ -88,12 +94,15 @@ public class MovieServiceImpl implements MovieService {
 	public MovieDto updateMovie(MovieDto movieDto) {
 		System.out.println("this is update method");
 		
+		
 		deleteCommentsForUpdating(movieDto);
 		
 		//for updating movie
 		Long id = movieDto.getId();
 		Movie modifiedMovie = this.movieDao.getById(id);
 		System.out.println("Comments that retrieve from db after deleting comments" + modifiedMovie.getMovieComments());
+		System.out.println("After remove cmt, movie that retrieve again from db " + modifiedMovie);
+		System.out.println("Comment count after delete comments " + modifiedMovie.getMovieComments().size());
 		
 		modifiedMovie.setTitle(movieDto.getTitle());
 		modifiedMovie.setGenre(movieDto.getGenre());
@@ -102,8 +111,6 @@ public class MovieServiceImpl implements MovieService {
 		
 		updateDetailsAndComments(movieDto, modifiedMovie);
 		
-		Movie m = this.movieDao.getById(id);
-		System.out.println("After remove cmt, movie that retrieve again from db " + m);
 		
 		System.out.println("have bind changed comments to the movie..." + modifiedMovie);
 		MovieDto dto = null;
@@ -121,25 +128,34 @@ public class MovieServiceImpl implements MovieService {
 		System.out.println("Old comment count " + oldMovie.getMovieComments().size());
 		System.out.println("Request comment count " + movieDto.getMovieComments().size());
 		if (movieDto.getMovieComments().size() < oldMovie.getMovieComments().size()) {
+			List<MovieComment> commentsToRemove = new ArrayList<>();
+			
 			for (MovieCommentDto commentDto : movieDto.getMovieComments()) {
-				List<MovieComment> commentsToRemove = oldMovie.getMovieComments().stream()
+				commentsToRemove = oldMovie.getMovieComments().stream()
 						.filter(cmt -> cmt.getId() != commentDto.getId()).collect(Collectors.toList());
 				commentsToRemove.forEach(cmt -> System.out.println("comment to remove " + cmt));
+				
+				
 
 				// retrieve comment to remove foreign key
 				commentsToRemove.forEach(cmt -> {
+//					
 								int deleteCount = this.movieCommentDao.deleteCommentById(cmt.getId());
 								System.out.println("Delete movie count " + deleteCount);
-					
-								Movie movie = cmt.getMovie();
-								System.out.println("Movie ... " + movie);
-								movie.getMovieComments().remove(cmt);
-								System.out.println("Movie to save for remove comment " + movie);
-								this.movieDao.save(movie);
 								
-								Movie m = this.movieDao.getById(movieDto.getId());
-								System.out.println("Movie after remove comment and save movie to db " + m);
+//								Movie movie = cmt.getMovie();
+//								System.out.println("Movie ... " + movie);
+//							
+//								movie.getMovieComments().remove(cmt);
+//								movie.getMovieComments().forEach(comment-> comment.setMovie(movie));
+//								System.out.println("Movie to save for remove comment " + movie);
+//								this.movieDao.save(movie);
 								
+//								Movie m = this.movieDao.getById(movieDto.getId());
+//								System.out.println("Movie after remove comment and save movie to db " + m);
+								
+								entityManager.flush();
+								entityManager.clear();
 								
 				});
 
@@ -270,9 +286,11 @@ public class MovieServiceImpl implements MovieService {
 					System.out.println("incoming updated comment with ID " + commentDto.getId());
 					
 					Optional<MovieComment> result = this.movieCommentDao.findById(commentDto.getId());
+					
 					MovieComment existingComment = null;
 					if(result.isPresent()) {
 						existingComment = result.get();
+						System.out.println("Retrieve existing comment from DB to update " + existingComment);
 					}
 					else {
 						System.out.println("Comment not found");
