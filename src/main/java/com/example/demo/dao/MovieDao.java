@@ -7,10 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.demo.model.dto.GenreCount;
 import com.example.demo.model.entity.Movie;
+
+import jakarta.transaction.Transactional;
 
 
 public interface MovieDao extends JpaRepository<Movie, Long>{
@@ -29,4 +32,6 @@ public interface MovieDao extends JpaRepository<Movie, Long>{
 	
 	@Query("SELECT distinct(m.genre) AS genre, count(m.genre) AS count FROM Movie m GROUP BY m.genre")
 	List<GenreCount> findGenreAndCount();
+	
+	
 }

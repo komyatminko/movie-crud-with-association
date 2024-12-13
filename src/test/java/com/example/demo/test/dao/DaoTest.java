@@ -1,5 +1,6 @@
 package com.example.demo.test.dao;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 
+import com.example.demo.dao.MovieCommentDao;
 import com.example.demo.dao.MovieDao;
 import com.example.demo.model.dto.GenreCount;
 import com.example.demo.model.dto.MovieDto;
@@ -30,6 +33,9 @@ public class DaoTest {
 	
 	@Autowired
 	MovieService movieService;
+	
+	@Autowired
+	MovieCommentDao commentDao;
 	
 //	@Test
 //	public void findByGenreTest() {
@@ -112,11 +118,40 @@ public class DaoTest {
 //		}
 //		
 //	}
+//	
+//	@Test
+//	public void test() {
+//		MovieDto dto = this.movieService.getMovieById(9L).get();
+//		System.out.println(dto.getCreatedAt());
+//	}
+	
+//	@Test
+//	@Transactional
+//	@Modifying
+//	public void deleteCommentTest() {
+//		
+//		MovieComment comment = this.commentDao.getById(26L);
+//		System.out.println("old comment " + comment);
+//		comment.setMovie(null);
+//		System.out.println("comment after setting movie id to null" + comment);
+//		this.commentDao.deleteById(26L);
+//
+//	}
 	
 	@Test
-	public void test() {
-		MovieDto dto = this.movieService.getMovieById(9L).get();
-		System.out.println(dto.getCreatedAt());
+	@Transactional
+	public void selectCommentTest() {
+//		MovieComment cmt = this.commentDao.getById(2L);
+//		Movie movie = cmt.getMovie();
+//		System.out.println("Movie ... " + movie);
+//		movie.getMovieComments().remove(cmt);
+//		System.out.println("Movie to save for remove comment " + movie);
+//		Movie m = this.movieDao.save(movie);
+//		cmt.setMovie(movie);
+//		System.out.println("Movie after remove comment and save movie to db " + m);
+		int deleteCount = this.commentDao.deleteCommentById(2L);
+		System.out.println("Delete movie count "+ deleteCount);
 	}
+
 }
 

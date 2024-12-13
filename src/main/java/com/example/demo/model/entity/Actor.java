@@ -22,8 +22,6 @@ public class Actor extends BaseEntity implements Serializable{
 	
 	@Column
 	private String gender;
-	
-	
 
 	public Actor(String firstName, String lastName, Date birthday, String gender) {
 		this.firstName = firstName;

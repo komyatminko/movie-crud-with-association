@@ -3,6 +3,8 @@ package com.example.demo.model.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hibernate.annotations.DialectOverride.Version;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 @Entity
 
@@ -33,10 +36,13 @@ public class Movie extends BaseEntity implements Serializable{
 				orphanRemoval = true)
 	private MovieDetails movieDetails;
 	
-	@OneToMany(	cascade = CascadeType.ALL,
+	@OneToMany(	
+				cascade = CascadeType.ALL,
+				fetch = FetchType.LAZY,
 				orphanRemoval = true)
 	@JoinColumn(name = "movie_id")
 	List<MovieComment> movieComments;
+	
 	
 	public Movie(String title, Integer year, String genre, MovieDetails details, List<MovieComment> comments) {
 		this.title = title;
@@ -88,12 +94,22 @@ public class Movie extends BaseEntity implements Serializable{
 		this.movieComments = comments;
 	}
 
-//	@Override
-//	public String toString() {
-//		return "Movie [title=" + title + ", year=" + year + ", genre=" + genre + ", movieDetails=" + movieDetails
-//				+ ", comments=" + movieComments + ", id=" + id + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-//				+ "]";
-//	}
+	public void addComment(MovieComment comment) {
+		this.movieComments.add(comment);
+		comment.setMovie(this);
+	}
+	
+	public void removeComment(MovieComment comment) {
+		this.movieComments.remove(comment);
+		comment.setMovie(null);
+	}
+	
+	@Override
+	public String toString() {
+		return "Movie [title=" + title + ", year=" + year + ", genre=" + genre + ", movieDetails=" + movieDetails
+				+ ", comments=" + movieComments + ", id=" + id + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+				+ "]";
+	}
 
 	
 }

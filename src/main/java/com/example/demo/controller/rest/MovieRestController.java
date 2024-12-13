@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.example.demo.model.dto.MovieDto;
+import com.example.demo.model.entity.MovieComment;
+import com.example.demo.service.CommentService;
 import com.example.demo.service.MovieService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +36,11 @@ public class MovieRestController {
 	
 	@GetMapping
 	public List<MovieDto> getAllMovies() {
-		System.out.println("get all movies");
 		List<MovieDto> movies = new ArrayList<>();
 		try {
 			movies = this.movieService.getAllMovies();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			System.out.println(e.getMessage());
 		}
 		return  movies;
@@ -66,12 +66,12 @@ public class MovieRestController {
 		}
 		else {
 			dto = this.movieService.saveMovie(movieDto);
-			return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+			return ResponseEntity.status(202).body(dto);
 		} 
 		
 	}
 	
-	@PutMapping("/update/{id}")
+	@PutMapping("/update")
 	public ResponseEntity<Object> updateMovie(@RequestBody MovieDto movieDto, BindingResult result) {
 		
 		MovieDto dto;
@@ -80,8 +80,8 @@ public class MovieRestController {
 		}
 		else {
 //			System.out.println("this is update route");
-			dto = this.movieService.saveMovie(movieDto);
-			return ResponseEntity.status(HttpStatus.ACCEPTED).body(dto);
+			dto = this.movieService.updateMovie(movieDto);
+			return ResponseEntity.accepted().body(dto);
 		} 
 		
 	}
@@ -90,11 +90,12 @@ public class MovieRestController {
 	public ResponseEntity<Object> removeMovieById(@PathVariable Long id) {
 		
 		try {
+			System.out.println("This is delete controller");
 			this.movieService.removeMovieById(id);
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+			return ResponseEntity.noContent().build();
 		}
 		catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 		
 	}

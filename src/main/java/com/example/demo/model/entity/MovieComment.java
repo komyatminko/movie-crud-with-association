@@ -2,6 +2,7 @@ package com.example.demo.model.entity;
 
 import java.io.Serializable;
 
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +26,7 @@ public class MovieComment extends BaseEntity implements Serializable{
 	private String comment;
 	
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name ="movie_id")
+	@JoinColumn(name ="movie_id", nullable = false)
 	private Movie movie;
 
 	public String getComment() {
@@ -43,12 +44,15 @@ public class MovieComment extends BaseEntity implements Serializable{
 	public void setMovie(Movie movie) {
 		this.movie = movie;
 	}
+	
+	@Override
+	public String toString() {
+		return "MovieComment [comment=" + this.getComment() + ", id=" + this.getId() + " movie_id=" + this.getMovie().getId() + "]";
+	}
 
-//	@Override
-//	public String toString() {
-//		return "MovieComment [comment=" + comment + ", movie=" + movie + ", id=" + id + ", createdAt=" + createdAt
-//				+ ", updatedAt=" + updatedAt + "]";
-//	}
+
+
+	
 	
 	
 	
