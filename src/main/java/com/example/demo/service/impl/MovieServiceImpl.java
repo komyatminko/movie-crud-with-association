@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dao.MovieCommentDao;
 import com.example.demo.dao.MovieDao;
+import com.example.demo.exception.MovieNotFoundException;
 import com.example.demo.model.dto.MovieCommentDto;
 import com.example.demo.model.dto.MovieDetailsDto;
 import com.example.demo.model.dto.MovieDto;
@@ -23,6 +24,7 @@ import com.example.demo.model.entity.MovieDetails;
 import com.example.demo.service.MovieService;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
@@ -173,23 +175,35 @@ public class MovieServiceImpl implements MovieService {
 
 
 	@Transactional
+	@Modifying
 	@Override
-	public void removeMovieById(Long id) {
-		Movie movie = this.movieDao.getById(id);
-		System.out.println("movie to be deleted " + movie);
-		
-		List<MovieComment> updatedComments = new ArrayList<>();
-		for(MovieComment comment: movie.getMovieComments()) {
+	public void removeMovieById(Long id) throws MovieNotFoundException{
+		try {
+			Movie movie = this.movieDao.getById(id);
+			System.out.println("movie to be deleted " + movie);
 			
-			System.out.println("deleting comment id = " + comment.getId());
-			comment.setMovie(null);
-			updatedComments.add(comment);
-			this.movieCommentDao.delete(comment);
-			
+			List<MovieComment> comments = movie.getMovieComments();
+			comments.forEach(cmt -> {
+				
+				int deleteCount = this.movieCommentDao.deleteCommentById(cmt.getId());
+				System.out.println("Delete movie ID : " + cmt.getId());
+				
+				entityManager.flush();
+				entityManager.clear();
+				
+			});
+			Movie movieRemovedComments = this.movieDao.getById(id);
+			this.movieDao.delete(movieRemovedComments);
+		}
+		catch(EntityNotFoundException e) {
+			throw new MovieNotFoundException("Movie not found.");
 		}
 		
-		movie.getMovieComments().clear();
-		this.movieDao.deleteById(id);;
+		
+			
+		
+		
+		
 		
 	}
 	

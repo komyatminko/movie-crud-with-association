@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.example.demo.exception.MovieNotFoundException;
 import com.example.demo.model.dto.MovieDto;
 import com.example.demo.model.entity.MovieComment;
 import com.example.demo.service.CommentService;
@@ -94,7 +95,7 @@ public class MovieRestController {
 			this.movieService.removeMovieById(id);
 			return ResponseEntity.noContent().build();
 		}
-		catch(Exception e) {
+		catch(MovieNotFoundException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 		
