@@ -2,9 +2,16 @@ package com.example.demo.model.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToMany;
+import lombok.ToString;
 
 @Entity
 public class Actor extends BaseEntity implements Serializable{
@@ -22,12 +29,20 @@ public class Actor extends BaseEntity implements Serializable{
 	
 	@Column
 	private String gender;
+	
+	@ManyToMany(
+			mappedBy = "movieActors",
+			cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY
+			)
+	private List<Movie> movies;
 
-	public Actor(String firstName, String lastName, Date birthday, String gender) {
+	public Actor(String firstName, String lastName, Date birthday, String gender, List<Movie> movies) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.birthday = birthday;
 		this.gender = gender;
+		this.movies = movies;
 	}
 	
 	public Actor() {}
@@ -63,5 +78,20 @@ public class Actor extends BaseEntity implements Serializable{
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
+
+	public List<Movie> getMovies() {
+		return movies;
+	}
+
+	public void setMovies(List<Movie> movies) {
+		this.movies = movies;
+	}
+
+//	@Override
+//	public String toString() {
+//		return "Actor [firstName=" + firstName + ", lastName=" + lastName + ", birthday=" + birthday + ", gender="
+//				+ gender + ", movies=" + movies + "]";
+//	}
+	
 	
 }

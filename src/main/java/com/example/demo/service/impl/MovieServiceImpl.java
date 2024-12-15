@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import com.example.demo.dao.MovieCommentDao;
 import com.example.demo.dao.MovieDao;
 import com.example.demo.exception.MovieNotFoundException;
+import com.example.demo.model.dto.ActorDto;
 import com.example.demo.model.dto.MovieCommentDto;
 import com.example.demo.model.dto.MovieDetailsDto;
 import com.example.demo.model.dto.MovieDto;
+import com.example.demo.model.entity.Actor;
 import com.example.demo.model.entity.Movie;
 import com.example.demo.model.entity.MovieComment;
 import com.example.demo.model.entity.MovieDetails;
@@ -253,6 +255,18 @@ public class MovieServiceImpl implements MovieService {
 				movieCommentsDto.add(comment);
 			}
 			movieDto.setMovieComments(movieCommentsDto);
+		}
+		
+		if(movie.getMovieActors() != null) {
+			System.out.println("actor count" + movie.getMovieActors().size());
+			List<Actor> actors = movie.getMovieActors();
+			List<ActorDto> actorsDto = new ArrayList<>();
+			
+			for(Actor actor : actors) {
+				ActorDto actorDto = modelMapper.map(actor, ActorDto.class);
+				actorsDto.add(actorDto);
+			}
+			movieDto.setActors(actorsDto);
 		}
 		return movieDto;
 	}

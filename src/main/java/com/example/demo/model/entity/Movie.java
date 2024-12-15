@@ -10,9 +10,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import lombok.ToString;
 
 @Entity
 public class Movie extends BaseEntity implements Serializable{
@@ -43,12 +46,28 @@ public class Movie extends BaseEntity implements Serializable{
 	List<MovieComment> movieComments;
 	
 	
-	public Movie(String title, Integer year, String genre, MovieDetails details, List<MovieComment> comments) {
+	@ManyToMany(
+				cascade = CascadeType.ALL,
+				fetch = FetchType.LAZY
+			)
+	@JoinTable(name = "actor_in_movie",
+				joinColumns = {@JoinColumn(name = "movie_id")},
+				inverseJoinColumns = {@JoinColumn(name = "actor_id")})
+	private List<Actor> movieActors;
+	
+	
+	public Movie(	String title, Integer year, 
+					String genre, 
+					MovieDetails details, 
+					List<MovieComment> comments,
+					List<Actor> movieActors
+				) {
 		this.title = title;
 		this.year = year;
 		this.genre = genre;
 		this.movieDetails = details;
 		this.movieComments = comments;
+		this.movieActors = movieActors;
 	}
 	
 	public Movie() {}
@@ -103,11 +122,19 @@ public class Movie extends BaseEntity implements Serializable{
 		comment.setMovie(null);
 	}
 	
+	public List<Actor> getMovieActors() {
+		return movieActors;
+	}
+
+	public void setMovieActors(List<Actor> movieActors) {
+		this.movieActors = movieActors;
+	}
+
 	@Override
+	
 	public String toString() {
 		return "Movie [title=" + title + ", year=" + year + ", genre=" + genre + ", movieDetails=" + movieDetails
-				+ ", comments=" + movieComments + ", id=" + id + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
-				+ "]";
+				+ ", movieComments=" + movieComments + ", movieActors=" + movieActors + "]";
 	}
 
 	

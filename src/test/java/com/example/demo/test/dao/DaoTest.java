@@ -141,14 +141,6 @@ public class DaoTest {
 	@Test
 	@Transactional
 	public void selectCommentTest() {
-//		MovieComment cmt = this.commentDao.getById(2L);
-//		Movie movie = cmt.getMovie();
-//		System.out.println("Movie ... " + movie);
-//		movie.getMovieComments().remove(cmt);
-//		System.out.println("Movie to save for remove comment " + movie);
-//		Movie m = this.movieDao.save(movie);
-//		cmt.setMovie(movie);
-//		System.out.println("Movie after remove comment and save movie to db " + m);
 		int deleteCount = this.commentDao.deleteCommentById(2L);
 		System.out.println("Delete movie count "+ deleteCount);
 	}

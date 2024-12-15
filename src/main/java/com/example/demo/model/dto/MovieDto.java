@@ -25,8 +25,11 @@ public class MovieDto {
 	
 	private List<MovieCommentDto> movieComments;
 	
+	private List<ActorDto> actors;
+	
 	public MovieDto(Long id, String title, Integer year, String genre, Date createdAt, Date updatedAt, 
-					MovieDetailsDto movieDetails, List<MovieCommentDto> movieComments) {
+					MovieDetailsDto movieDetails, List<MovieCommentDto> movieComments,
+					List<ActorDto> actorsDto) {
 		this.id = id;
 		this.title = title;
 		this.year = year;
@@ -35,6 +38,7 @@ public class MovieDto {
 		this.updatedAt = updatedAt;
 		this.movieDetails = movieDetails;
 		this.movieComments = movieComments;
+		this.actors = actorsDto;
 	}
 
 	public MovieDto() {}
@@ -97,11 +101,19 @@ public class MovieDto {
 		this.movieComments = movieComments;
 	}
 
+	public List<ActorDto> getActors() {
+		return actors;
+	}
+
+	public void setActors(List<ActorDto> actorsDto) {
+		this.actors = actorsDto;
+	}
+
 	@Override
 	public String toString() {
 		return "MovieDto [id=" + id + ", title=" + title + ", year=" + year + ", genre=" + genre + ", createdAt="
 				+ createdAt + ", updatedAt=" + updatedAt + ", movieDetails=" + movieDetails + ", movieComments="
-				+ movieComments + "]";
+				+ movieComments + ", actorsDto=" + actors + "]";
 	}
 	
 	
