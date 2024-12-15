@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.example.demo.dao.ActorDao;
+import com.example.demo.exception.ActorNotFoundException;
 import com.example.demo.exception.MovieNotFoundException;
 import com.example.demo.model.dto.MovieDto;
+import com.example.demo.model.entity.Actor;
 import com.example.demo.model.entity.MovieComment;
 import com.example.demo.service.CommentService;
 import com.example.demo.service.MovieService;
@@ -66,7 +69,12 @@ public class MovieRestController {
 			return ResponseEntity.badRequest().body(result.getAllErrors());
 		}
 		else {
-			dto = this.movieService.saveMovie(movieDto);
+			try {
+				dto = this.movieService.saveMovie(movieDto);
+			} catch (ActorNotFoundException e) {
+				// TODO Auto-generated catch block
+				return ResponseEntity.badRequest().body(e.getMessage());
+			}
 			return ResponseEntity.status(202).body(dto);
 		} 
 		

@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dao.ActorDao;
 import com.example.demo.dao.MovieCommentDao;
 import com.example.demo.dao.MovieDao;
+import com.example.demo.exception.ActorNotFoundException;
 import com.example.demo.exception.MovieNotFoundException;
 import com.example.demo.model.dto.ActorDto;
 import com.example.demo.model.dto.MovieCommentDto;
@@ -41,6 +43,9 @@ public class MovieServiceImpl implements MovieService {
 	
 	@Autowired
 	MovieCommentDao movieCommentDao;
+	
+	@Autowired
+	ActorDao actorDao;
 
 	ModelMapper modelMapper = new ModelMapper();
 
@@ -77,17 +82,18 @@ public class MovieServiceImpl implements MovieService {
 
 
 	@Override
-	public MovieDto saveMovie(MovieDto movieDto) {
+	public MovieDto saveMovie(MovieDto movieDto) throws ActorNotFoundException{
 		
-		Movie movie = MovieDtoToEntity(movieDto);
-
+		Movie movie = null;
 		try {
+			movie = MovieDtoToEntity(movieDto);
 			movie = this.movieDao.save(movie);
-		} catch (Exception e) {
-			e.printStackTrace();
+			movieDto = modelMapper.map(movie, MovieDto.class);
+		} catch (ActorNotFoundException e) {
+			// TODO Auto-generated catch block
+			throw new ActorNotFoundException("Actor not found.");
 		}
-
-		movieDto = modelMapper.map(movie, MovieDto.class);
+		
 		return movieDto;
 	}
 	
@@ -147,17 +153,6 @@ public class MovieServiceImpl implements MovieService {
 								int deleteCount = this.movieCommentDao.deleteCommentById(cmt.getId());
 								System.out.println("Delete movie count " + deleteCount);
 								
-//								Movie movie = cmt.getMovie();
-//								System.out.println("Movie ... " + movie);
-//							
-//								movie.getMovieComments().remove(cmt);
-//								movie.getMovieComments().forEach(comment-> comment.setMovie(movie));
-//								System.out.println("Movie to save for remove comment " + movie);
-//								this.movieDao.save(movie);
-								
-//								Movie m = this.movieDao.getById(movieDto.getId());
-//								System.out.println("Movie after remove comment and save movie to db " + m);
-								
 								entityManager.flush();
 								entityManager.clear();
 								
@@ -209,7 +204,7 @@ public class MovieServiceImpl implements MovieService {
 		
 	}
 	
-	private Movie MovieDtoToEntity(MovieDto movieDto) {
+	private Movie MovieDtoToEntity(MovieDto movieDto) throws ActorNotFoundException{
 		Movie movie = modelMapper.map(movieDto, Movie.class);
 			
 		//for save
@@ -232,9 +227,53 @@ public class MovieServiceImpl implements MovieService {
 				comments.add(movieComment);
 
 			}
-			
-			
 			movie.setMovieComments(comments);
+		}
+		
+		if(movieDto.getActors() != null) {
+			System.out.println("actor present.");
+			
+			List<Actor> actors = new ArrayList<>();
+			for(ActorDto actorDto : movieDto.getActors()) {
+				
+				Actor actor = modelMapper.map(actorDto, Actor.class);
+				
+				if(actorDto.getId() != null) {
+					System.out.println("Incoming actor ID : " + actorDto.getId());
+					try {
+						Actor existingActor = this.actorDao.getById(actorDto.getId());
+						System.out.println("Actor exist and actor in movies are " + existingActor.getMovies().toString());
+						
+						//existing actor but movies empty list
+						if(existingActor.getMovies() == null) {
+							System.out.println("actor with movies empty list");
+							List<Movie> movies = new ArrayList<>();
+							movies.add(movie);
+							actor.setMovies(movies);
+						}
+						//existing actor with movies list
+						else {
+							System.out.println("actor with movies list");
+							System.out.println("movie list size " + existingActor.getMovies().size());
+							existingActor.getMovies().add(movie);
+							actors.add(existingActor);
+						}
+					}
+					catch(EntityNotFoundException e) {
+						throw new ActorNotFoundException("Actor not found!");
+					}
+				}
+				else {
+					System.out.println("New actor");
+					List<Movie> movies = new ArrayList<>();
+					movies.add(movie);
+					actor.setMovies(movies);
+					actors.add(actor);
+				}
+				
+			}
+			movie.setMovieActors(actors);
+			
 		}
 		return movie;
 	}

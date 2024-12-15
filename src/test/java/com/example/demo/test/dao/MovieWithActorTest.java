@@ -23,27 +23,33 @@ public class MovieWithActorTest {
 	@Autowired
 	ActorDao actorDao;
 	
-//	@Test
-//	@Transactional
-//	public void getActorByIdTest(){
-//		
-//		Actor actor = this.actorDao.getById(1L);
-//		System.out.println(actor.getFirstName() + " " + actor.getLastName());
-//		
-//		List<Movie> movie = actor.getMovies();
-//		movie.forEach(System.out::println);
-//		
-//	}
-	
 	@Test
 	@Transactional
-	public void getMovieByIdTest(){
+	public void getActorByIdTest(){
 		
-		Movie movie = this.movieDao.getById(1L);
-		System.out.println(movie);
+		Actor actor = this.actorDao.getById(8L);
+		System.out.println(actor.getFirstName() + " " + actor.getLastName() + "    " + actor.getBirthday());
 		
-		List<Actor> actors = movie.getMovieActors();
-		actors.forEach(actor -> System.out.println(actor.getFirstName() + " " + actor.getLastName()));
+//		List<Movie> movie = actor.getMovies();
+//		if(movie == null) {
+//			System.out.println("Movie is null");
+//		}
+//		else {
+//			movie.forEach(System.out::println);
+//		}
+		
 		
 	}
+	
+//	@Test
+//	@Transactional
+//	public void getMovieByIdTest(){
+//		
+//		Movie movie = this.movieDao.getById(1L);
+//		System.out.println(movie);
+//		
+//		List<Actor> actors = movie.getMovieActors();
+//		actors.forEach(actor -> System.out.println(actor.getFirstName() + " " + actor.getLastName()));
+//		
+//	}
 }
