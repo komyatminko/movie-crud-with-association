@@ -106,6 +106,7 @@ public class MovieServiceImpl implements MovieService {
 		
 		
 		deleteCommentsForUpdating(movieDto);
+		deleteActorsForUpdating(movieDto);
 		
 		//for updating movie
 		Long id = movieDto.getId();
@@ -117,15 +118,15 @@ public class MovieServiceImpl implements MovieService {
 		modifiedMovie.setTitle(movieDto.getTitle());
 		modifiedMovie.setGenre(movieDto.getGenre());
 		modifiedMovie.setYear(movieDto.getYear());
-//		modifiedMovie.setCreatedAt(modifiedMovie.getCreatedAt());
 		
 		updateDetailsAndComments(movieDto, modifiedMovie);
+		updateActors(movieDto, modifiedMovie);
 		
 		
 		System.out.println("have bind changed comments to the movie..." + modifiedMovie);
 		MovieDto dto = null;
 		
-		this.movieDao.save(modifiedMovie);
+//		this.movieDao.save(modifiedMovie);
 		dto = this.MovieEntityToDto(modifiedMovie);
 		
 		return dto;
@@ -136,8 +137,8 @@ public class MovieServiceImpl implements MovieService {
 		Movie oldMovie = this.movieDao.getById(movieDto.getId());
 		System.out.println("Movie before deleting comments " + oldMovie);
 		System.out.println("Old comment count " + oldMovie.getMovieComments().size());
-		System.out.println("Request comment count " + movieDto.getMovieComments().size());
-		if (movieDto.getMovieComments().size() < oldMovie.getMovieComments().size()) {
+//		System.out.println("Request comment count " + movieDto.getMovieComments().size());
+		if (movieDto.getMovieComments() != null && movieDto.getMovieComments().size() < oldMovie.getMovieComments().size()) {
 			List<MovieComment> commentsToRemove = new ArrayList<>();
 			
 			for (MovieCommentDto commentDto : movieDto.getMovieComments()) {
@@ -167,7 +168,7 @@ public class MovieServiceImpl implements MovieService {
 	private void updateDetailsAndComments(MovieDto movieDto, Movie modifiedMovie) {
 		updatingDetails(movieDto, modifiedMovie);
 		updatingComments(movieDto, modifiedMovie);
-//		updatingCommentsTwo(movieDto, modifiedMovie);
+		
 	}
 
 
@@ -195,13 +196,7 @@ public class MovieServiceImpl implements MovieService {
 		catch(EntityNotFoundException e) {
 			throw new MovieNotFoundException("Movie not found.");
 		}
-		
-		
 			
-		
-		
-		
-		
 	}
 	
 	private Movie MovieDtoToEntity(MovieDto movieDto) throws ActorNotFoundException{
@@ -380,6 +375,97 @@ public class MovieServiceImpl implements MovieService {
 			System.out.println("Comments are null ");
 		}
 		
+	}
+	
+	private void updateActors(MovieDto requestMovieDto, Movie oldMovie) {
+
+		System.out.println("updating actors...");
+
+		if (requestMovieDto.getActors() != null) {
+
+			List<Actor> updatedActors = new ArrayList<>();
+
+			for (ActorDto actorDto : requestMovieDto.getActors()) {
+				// for new actor
+				if (actorDto.getId() == null) {
+
+					System.out.println("Updating new actor...");
+
+					Actor newActor = new Actor();
+//					newActor.setComment(actorDto.getComment());
+//					newActor.setMovie(oldMovie);
+					List<Movie> movies = new ArrayList<>();
+					movies.add(oldMovie);
+
+					newActor.setFirstName(actorDto.getFirstName());
+					newActor.setLastName(actorDto.getLastName());
+					newActor.setBirthday(actorDto.getBirthday());
+					newActor.setGender(actorDto.getGender());
+					newActor.setMovies(movies);
+					updatedActors.add(newActor);
+				}
+				// to update existing comment
+				else if (actorDto.getId() != null) {
+					System.out.println("updating existing actor...");
+					System.out.println("incoming updated actor with ID " + actorDto.getId());
+
+					Optional<Actor> result = this.actorDao.findById(actorDto.getId());
+
+					Actor existingActor = null;
+					if (result.isPresent()) {
+						existingActor = result.get();
+						System.out.println("Retrieve existing actor from DB to update " + existingActor);
+					} else {
+						System.out.println("Comment not found");
+					}
+					
+					existingActor.setFirstName(actorDto.getFirstName());
+					existingActor.setLastName(actorDto.getLastName());
+					existingActor.setBirthday(actorDto.getBirthday());
+					existingActor.setGender(actorDto.getGender());
+					existingActor.getMovies().add(oldMovie);
+					updatedActors.add(existingActor);
+				}
+			}
+
+			System.out.println("updated actors " + updatedActors.toString());
+			oldMovie.getMovieActors().clear();
+			oldMovie.getMovieActors().addAll(updatedActors);
+
+		} else {
+			System.out.println("actors are null ");
+		}
+
+	}
+
+	private void deleteActorsForUpdating(MovieDto movieDto) {
+		// for remove an existing actor
+		Movie oldMovie = this.movieDao.getById(movieDto.getId());
+		System.out.println("Movie before deleting actors " + oldMovie);
+		System.out.println("Old actors count " + oldMovie.getMovieActors().size());
+
+		if (movieDto.getActors() != null
+				&& movieDto.getActors().size() < oldMovie.getMovieActors().size()) {
+			List<Actor> actorsToRemove = new ArrayList<>();
+
+			for (ActorDto actorDto : movieDto.getActors()) {
+				actorsToRemove = oldMovie.getMovieActors().stream().filter(actor -> actor.getId() != actorDto.getId())
+						.collect(Collectors.toList());
+				actorsToRemove.forEach(actor -> System.out.println("comment to remove " + actor));
+
+				// retrieve actors to remove foreign key
+				actorsToRemove.forEach(actor -> {
+		
+					int deleteCount = this.actorDao.deleteActorById(actor.getId());
+					System.out.println("Delete actor count " + deleteCount);
+
+					entityManager.flush();
+					entityManager.clear();
+
+				});
+
+			}
+		}
 	}
 	
 }
