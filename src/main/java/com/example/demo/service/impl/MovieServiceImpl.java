@@ -126,7 +126,7 @@ public class MovieServiceImpl implements MovieService {
 		System.out.println("have bind changed comments to the movie..." + modifiedMovie);
 		MovieDto dto = null;
 		
-//		this.movieDao.save(modifiedMovie);
+		this.movieDao.save(modifiedMovie);
 		dto = this.MovieEntityToDto(modifiedMovie);
 		
 		return dto;
